@@ -1,5 +1,9 @@
-// Define the center point for Raleigh, North Carolina
-var center = ee.Geometry.Point([-78.66638044690248, 35.80269787969758]);
+// Define the center point 
+var center = ee.Geometry.Point([-117.075958147392,32.7576576579701]);
+
+//CHANGE THESE!
+var city = 'SanDiego'
+var year = '2024'
 
 // Define the bounding box with a buffer radius (2560 meters for 512x512 pixels at 10m resolution)
 var geometry = center.buffer(2560).bounds();
@@ -7,7 +11,7 @@ var geometry = center.buffer(2560).bounds();
 // Load Sentinel-2 MSI Level-2A as imageCollection
 var sentinel2 = ee.ImageCollection("COPERNICUS/S2_SR_HARMONIZED")
   .filterBounds(geometry)
-  .filterDate('2019-08-01', '2019-08-30')  // Specify a date range
+  .filterDate(year+'-08-01', year+'-08-30')  // Specify a date range
   .filter(ee.Filter.lt('CLOUDY_PIXEL_PERCENTAGE', 10))  // Filter low cloud cover
   .median();  // Use median to create a composite image
 
@@ -66,6 +70,8 @@ Map.addLayer(ndviClassified.clip(geometry), ndviClassVis, 'NDVI Classified');
 Export.image.toDrive({
   image: enhancedRGB.clip(geometry).visualize(vizParams),
   description: 'EnhancedRGB',
+  folder: year,
+  fileNamePrefix: city+'_',
   region: geometry,
   fileFormat: 'GEOTIFF',
   crs: 'EPSG:3857',
@@ -76,6 +82,8 @@ Export.image.toDrive({
 Export.image.toDrive({
   image: ndviClassified.clip(geometry),
   description: 'NDVI_Classified',
+  folder: year,
+  fileNamePrefix: 'm_'+city+'_',
   region: geometry,
   fileFormat: 'GEOTIFF',
   crs: 'EPSG:3857',
